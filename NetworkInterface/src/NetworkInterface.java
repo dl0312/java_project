@@ -169,4 +169,15 @@ class NetworkMethod implements NetworkInterface {
 			return NETWORK_ERROR;
 		}
 	}
+	public int getUserNum(){
+		try{
+			ObjectOutputStream outStream = new ObjectOutputStream(new BufferedOutputStream(sock.getOutputStream()));
+			ObjectInputStream inStream = new ObjectInputStream(new BufferedInputStream(sock.getInputStream()));
+			outStream.writeInt(0);
+			
+			outStream.writeInt(PacketFlag.ENTER_LOBBY_REQ);
+			outStream.close();
+			inStream.readInt();
+		}
+		}
 }
