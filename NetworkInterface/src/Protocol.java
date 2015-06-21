@@ -1,4 +1,4 @@
-class Pair<U, V> {
+public class Pair<U, V> {
 
 	/**
 	 * The first element of this <code>Pair</code>
@@ -58,6 +58,11 @@ class PacketFlag {
 	public static final int WAIT_USER_REQ = 11;
 	// String class : nickname
 	public static final int WAIT_USER_RES = 12;
+	public static final int WAIT_USER_TIMEOVER_RES = 7777;
+	// x
+	public static final int GAME_READY_REQ = 1111;
+	// x
+	public static final int GAME_READY_RES = 2222;
 	
 	// x
 	public static final int EXIT_ROOM_REQ = 14;
