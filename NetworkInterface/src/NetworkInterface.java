@@ -125,34 +125,22 @@ interface NetworkInterface {
 
 
 class NetworkMethod implements NetworkInterface {
+	
 	public static final String ip = "163.239.200.116";
 	public static final int port = 7777;
+	
+	private static boolean READY_GAME_RES_FLAG = true;
+	private static boolean EXIT_ROOM_RES_FLAG = true;
+	private static boolean WAIT_GAME_START_RES_FLAG = true;
+	private static boolean DROP_BALL_RES_FLAG = true;
+	private static boolean WAIT_DROP_RES_FLAG = true;
 	private static Socket sock = null;
 	private boolean isConnected = false;
 	private NetworkRoomList roomdata;
 	private String username;
 	private int positiondrop;
 	
-	/*
-	public ObjectInputStream inputstream(){
-		DataInputStream resStream = new DataInputStream(sock.getInputStream());
-		int dataLen = resStream.readInt();
-		int readLen = 0;
-		int readSz;
-		byte[] resData = new byte[dataLen];
-		while(readLen < dataLen && (readSz=resStream.read(resData,readLen,dataLen-readLen)) != -1) {
-			readLen += readSz;
-		}
-		if(readLen < dataLen) {
-			sock.close();
-			return INVALID_RES;
-		}
-		ObjectInputStream resDataInputStream = new ObjectInputStream(new ByteArrayInputStream(resData));
-		return resDataInputStream;
-		//int flag = resDataInputStream.readInt();
-	}
 	
-	*/
 	public int enterLobby(String nickname) {
 		try {
 			sock = new Socket(ip, port);
@@ -499,6 +487,8 @@ class NetworkMethod implements NetworkInterface {
 				resDataInputStream.close();
 				sock.close();
 				return new Pair <Integer, String>( new Integer(INVALID_RES), username);
+			} else if(flag == TIME_OVER){
+				return new Pair <Integer, String>( new Integer(TIME_OVER), username);
 			} else {
 				int res = resDataInputStream.readInt();
 				resDataInputStream.close();
@@ -506,10 +496,11 @@ class NetworkMethod implements NetworkInterface {
 				if(res==USER_ENTER){
 					return new Pair <Integer, String>( new Integer(res), username);
 				}
+				
 				else{
 					return new Pair <Integer, String>( new Integer(INVALID_RES), username);
 				}
-			}
+			} 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
@@ -526,6 +517,10 @@ class NetworkMethod implements NetworkInterface {
 	
 	public int readyGame(){
 		try{
+			if(READY_GAME_RES_FLAG){
+				READY_GAME_RES_FLAG = false;
+			}
+			
 			DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
 			byte[] reqData;
 			ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
@@ -587,16 +582,19 @@ class NetworkMethod implements NetworkInterface {
 	
 	public int exitRoom(){
 		try{
-			DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
-			byte[] reqData;
-			ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
-			ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
-			reqDataOutputStream.writeInt(PacketFlag.EXIT_ROOM_REQ);
-			
-			reqData = reqDataStream.toByteArray();
-			reqStream.writeInt(reqData.length);
-			reqStream.write(reqData);
-			reqStream.flush();
+			if(EXIT_ROOM_RES_FLAG){
+				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
+				byte[] reqData;
+				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
+				ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
+				reqDataOutputStream.writeInt(PacketFlag.EXIT_ROOM_REQ);
+				
+				reqData = reqDataStream.toByteArray();
+				reqStream.writeInt(reqData.length);
+				reqStream.write(reqData);
+				reqStream.flush();
+				EXIT_ROOM_RES_FLAG = false;
+			}
 			
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
@@ -649,16 +647,18 @@ class NetworkMethod implements NetworkInterface {
 	
 	public int waitGameStart(){
 		try{
-			DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
-			byte[] reqData;
-			ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
-			ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
-			reqDataOutputStream.writeInt(PacketFlag.WAIT_GAMESTART_REQ);
-			reqData = reqDataStream.toByteArray();
-			reqStream.writeInt(reqData.length);
-			reqStream.write(reqData);
-			reqStream.flush();
-			
+			if(WAIT_GAME_START_RES_FLAG){
+				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
+				byte[] reqData;
+				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
+				ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
+				reqDataOutputStream.writeInt(PacketFlag.WAIT_GAMESTART_REQ);
+				reqData = reqDataStream.toByteArray();
+				reqStream.writeInt(reqData.length);
+				reqStream.write(reqData);
+				reqStream.flush();
+				EXIT_ROOM_RES_FLAG = false;
+			}
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
 			int readLen = 0;
@@ -710,17 +710,19 @@ class NetworkMethod implements NetworkInterface {
 	
 	public int dropBall(int pos){
 		try{
-			DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
-			byte[] reqData;
-			ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
-			ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
-			reqDataOutputStream.writeInt(PacketFlag.DROP_BALL_REQ);
-			reqDataOutputStream.writeObject(pos);
-			reqData = reqDataStream.toByteArray();
-			reqStream.writeInt(reqData.length);
-			reqStream.write(reqData);
-			reqStream.flush();
-			
+			if(DROP_BALL_RES_FLAG){
+				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
+				byte[] reqData;
+				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
+				ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
+				reqDataOutputStream.writeInt(PacketFlag.DROP_BALL_REQ);
+				reqDataOutputStream.writeObject(pos);
+				reqData = reqDataStream.toByteArray();
+				reqStream.writeInt(reqData.length);
+				reqStream.write(reqData);
+				reqStream.flush();
+				EXIT_ROOM_RES_FLAG = false;
+			}
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
 			int readLen = 0;
@@ -773,15 +775,19 @@ class NetworkMethod implements NetworkInterface {
 	
 	public Pair<Integer, Integer> waitDrop(){
 		try{
-			DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
-			byte[] reqData;
-			ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
-			ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
-			reqDataOutputStream.writeInt(PacketFlag.ENEMY_DROP_BALL_REQ);
-			reqData = reqDataStream.toByteArray();
-			reqStream.writeInt(reqData.length);
-			reqStream.write(reqData);
-			reqStream.flush();
+			if(WAIT_DROP_RES_FLAG){
+				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
+				byte[] reqData;
+				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
+				ObjectOutputStream reqDataOutputStream = new ObjectOutputStream(reqDataStream);
+				reqDataOutputStream.writeInt(PacketFlag.ENEMY_DROP_BALL_REQ);
+				reqData = reqDataStream.toByteArray();
+				reqStream.writeInt(reqData.length);
+				reqStream.write(reqData);
+				reqStream.flush();
+				EXIT_ROOM_RES_FLAG = false;
+			}
+			
 			
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
