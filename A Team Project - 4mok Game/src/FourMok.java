@@ -43,7 +43,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	private Label infoLabel2;
 	
 	
-	public static Panel GAME;			// room( game 진행 화면)
+	public static Panel GAME;	// room( game 진행 화면)
 	private Game game;			// game 함수
 	public static String user1;
 	public static String user2;
@@ -86,8 +86,8 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		listone = new Panel();
 		listone.setLayout(new GridLayout(3,2));
 		for(int i = 0 ; i < 6; i++){	//	6개
-			bt[i].setFont(new Font("Serif",Font.BOLD,30));
 			listone.add(bt[i] = new Button("empty"));
+			bt[i].setFont(new Font("Serif",Font.BOLD,30));
 		}
 		List.add(listone);
 		
@@ -140,7 +140,6 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		E_b.addActionListener(this);
 		reset.addActionListener(this);
 		makeroom.addActionListener(this);
-		
 		cld.show(this,"ENTER");
 	}
 	public void keyPressed(KeyEvent e) {
@@ -157,10 +156,6 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 				game.repaint();
 				break;
 		}
-		/*if(game.state == game.ST_EXIT){
-			GAME.remove(game);
-			System.out.println("dddd");
-		}*/
 	}
 	public void keyReleased(KeyEvent arg0) {}
 	public void keyTyped(KeyEvent arg0) {}
@@ -180,23 +175,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 				nameLabel.setText((login));
 				user1 = login;	// 닉네임 저장
 				button.requestFocus();
-				/*
-				Pair<Integer, NetworkRoomList> rl = nt.getRoomList();
-				getroomchk = rl.first();
-				if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
-					roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
-					newlist();
-					userNum = nt.getUserNum();
-					infoLabel1.setText("User number: " + Integer.toString(userNum));
-				}
-				else if( getroomchk == nt.NETWORK_ERROR ){
-					System.out.println("Net error");
-					cld.previous(this);
-				}
-				else if( getroomchk == nt.INVALID_REQ || getroomchk == nt.INVALID_RES){
-					System.out.println("INVALID");
-					cld.previous(this);
-				}*/
+				newlist();
 			}
 			else if( enterchk == nt.NETWORK_ERROR){
 				System.out.println("Net error");
@@ -212,22 +191,6 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 			}
 		}
 		else if( get.equals("RESET")){
-			/*Pair<Integer, NetworkRoomList> r2 = nt.getRoomList();
-			int getroomchk2 = r2.first();
-			if( getroomchk2 == nt.GET_ROOM_LIST_OK){	// roomlist
-				roomlists = new RoomList(r2.second().getRoomNum(), r2.second().getRooms());
-				newlist();
-				userNum = nt.getUserNum();
-				infoLabel1.setText("User number: " + Integer.toString(userNum));
-			}
-			else if( getroomchk2 == nt.NETWORK_ERROR){
-				System.out.println("Net Error");
-				cld.previous(this);
-			}
-			else if( getroomchk2 == nt.INVALID_REQ || getroomchk2 == nt.INVALID_RES){
-				System.out.println("INVALID");
-				cld.previous(this);
-			}*/
 			newlist();
 		}
 		else if( get.equals("MAKE")){
@@ -264,7 +227,9 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 						cld.previous(this);
 						break;
 					}
-				}		
+				}
+				
+				
 			}
 			else if( makechk == nt.NETWORK_ERROR ){
 				System.out.println("Net error");
@@ -277,7 +242,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		}
 		else{
 			int enterRoomchk;
-			enterRoomchk = nt.enterRoom(Integer.parseInt(get));
+			enterRoomchk = nt.enterRoom(Integer.parseInt(get.replaceAll("[^0-9]", "")));//
 			if(enterRoomchk == nt.ENTER_ROOM_OK){
 				game = new Game(this,'b');
 				GAME.add(game);
@@ -301,7 +266,6 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		int getroomchk = rl.first();
 		if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
 			roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
-			newlist();
 			userNum = nt.getUserNum();
 			infoLabel1.setText("User number: " + Integer.toString(userNum));
 		}

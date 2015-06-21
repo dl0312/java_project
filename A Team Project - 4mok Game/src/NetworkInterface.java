@@ -181,7 +181,7 @@ class NetworkMethod implements NetworkInterface {
 				return INVALID_RES;
 			} else {
 				int res = resDataInputStream.readInt();
-				System.out.println("[Debug] "+ "res : " + res + " *** ");
+				System.out.println("[Debug] (enterLobby) "+ "res : " + res + " *** ");
 				if(res == NICKNAME_OK) {
 					resDataInputStream.close();
 					isConnected = true;
@@ -246,9 +246,7 @@ class NetworkMethod implements NetworkInterface {
 			
 			System.out.println("[Debug] (getUserNum) " + "flag : " + flag);
 			if(flag != PacketFlag.GET_USERNUM_RES) {
-				// error handling
 				resDataInputStream.close();
-				//sock.close();
 				return INVALID_RES;
 			} else {
 				int User_Num = resDataInputStream.readInt();

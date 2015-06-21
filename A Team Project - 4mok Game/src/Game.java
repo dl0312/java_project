@@ -36,17 +36,17 @@ public class Game extends Canvas{
 	private static int x[];
 	private static int y[];
 	private static char status[][];	// red or blue or null('C')
-	private static char turn;		// turn of(red or blue)
+	private char turn;		// turn of(red or blue)
 	public char	winner; 			// winner
 	
-	public Game(Frame fm,char turn){
+	public Game(Frame fm,char t){
 		f = fm;
-		this.turn = turn;
+		turn = t;
 		Space = Toolkit.getDefaultToolkit().getImage("space.png");
 		Rball = Toolkit.getDefaultToolkit().getImage("red.png");
 		Bball = Toolkit.getDefaultToolkit().getImage("blue.png");
 		Victory = Toolkit.getDefaultToolkit().getImage("victory.png");;
-		state = ST_WAIT;
+		state = ST_MAIN;
 		Init();
 	}
 	public void Init(){
@@ -124,13 +124,13 @@ public class Game extends Canvas{
 		if(state == ST_GAME){
 			if(turn == 'r'){
 				AFTER.drawImage(Image_B,0,0,this);
-					AFTER.drawImage(Rball, x[col], 100, 40,40,this);
-					shadow(AFTER);
-				}
-				else{
-					AFTER.drawImage(Image_B,0,0,this);
-					AFTER.drawImage(Bball, x[col], 100, 40,40,this);
-					shadow(AFTER);
+				AFTER.drawImage(Rball, x[col], 100, 40,40,this);
+				shadow(AFTER);
+			}
+			else{
+				AFTER.drawImage(Image_B,0,0,this);
+				AFTER.drawImage(Bball, x[col], 100, 40,40,this);
+				shadow(AFTER);
 			}
 		}
 		
