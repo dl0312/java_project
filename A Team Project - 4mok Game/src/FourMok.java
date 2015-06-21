@@ -13,7 +13,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	
 	public static NetworkInterface nt;
 	
-	private int userNum;
+	private static int userNum;
 	public static Room[] rooms;
 	public static RoomList roomlists;
 	private int roomCount ;
@@ -30,7 +30,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	private Panel ROOM;			// room list 화면
 	private CardLayout Roomcard;  // roomlist card
 	private Panel List;			// room list
-	private Button[] bt;
+	private static Button[] bt;
 	private Panel listone;		// first page
 	private Panel listtwo;		// second page
 	private Panel info;			// up,down, make, information
@@ -39,13 +39,14 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	private Button makeroom;	
 	private Label nameLabel;
 	private Panel roominfo;		// 방정보 몇명
-	private Label infoLabel1;
+	private static Label infoLabel1;
 	private Label infoLabel2;
 	
 	
 	public static Panel GAME;			// room( game 진행 화면)
-	
 	private Game game;			// game 함수
+	public static String user1;
+	public static String user2;
 	
 	public FourMok(String str){
 		super(str);
@@ -85,22 +86,11 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		listone = new Panel();
 		listone.setLayout(new GridLayout(3,2));
 		for(int i = 0 ; i < 6; i++){	//	6개
+			bt[i].setFont(new Font("Serif",Font.BOLD,30));
 			listone.add(bt[i] = new Button("empty"));
 		}
 		List.add(listone);
 		
-		/*listtwo = new Panel();
-		listtwo.setLayout(new GridLayout(3,2));
-		listtwo.add(new Button());
-		listtwo.add(new Button());
-		listtwo.add(new Button());
-		listtwo.add(new Button());
-		listtwo.add(new Button());
-		listtwo.add(new Button());
-		List.add(listtwo);
-		*/
-		
-		////2-2 up ,down,방만들기(info)
 		info = new Panel();
 		info.setLayout(new BorderLayout());
 		info.setBackground(Color.DARK_GRAY);
@@ -178,37 +168,66 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		String get = e.getActionCommand();
 		System.out.println(get);
 		if( get.equals("입장")){
-			int entercheck;	// 입장 
-			entercheck = nt.enterLobby(E_nic.getText());
-			System.out.println(entercheck);
-			if( entercheck == nt.NICKNAME_OK){
+			int enterchk;	// 입장 
+			enterchk = nt.enterLobby(E_nic.getText());
+			System.out.println(enterchk);
+			// 닉네입 입장
+			if( enterchk == nt.NICKNAME_OK){
 				int getroomchk ;
 				cld.next(this);
 				login = E_nic.getText();
 				nameLabel.setFont(new Font("Serif", Font.BOLD+Font.ITALIC,100));
 				nameLabel.setText((login));
+				user1 = login;	// 닉네임 저장
 				button.requestFocus();
-				userNum = nt.getUserNum();
-				infoLabel1.setText("User number: "+Integer.toString(userNum));
-				getroomchk = nt.getRoomList().first();
+				/*
+				Pair<Integer, NetworkRoomList> rl = nt.getRoomList();
+				getroomchk = rl.first();
 				if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
-					roomlists = new RoomList(nt.getRoomList().second().getRoomNum(), nt.getRoomList().second().getRooms());
+					roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
 					newlist();
+					userNum = nt.getUserNum();
+					infoLabel1.setText("User number: " + Integer.toString(userNum));
 				}
 				else if( getroomchk == nt.NETWORK_ERROR ){
 					System.out.println("Net error");
+					cld.previous(this);
 				}
+				else if( getroomchk == nt.INVALID_REQ || getroomchk == nt.INVALID_RES){
+					System.out.println("INVALID");
+					cld.previous(this);
+				}*/
 			}
-			else if( entercheck == nt.NETWORK_ERROR)
+			else if( enterchk == nt.NETWORK_ERROR){
 				System.out.println("Net error");
-			else if( entercheck == nt.NICKNAME_DUP){
+			}
+			else if( enterchk == nt.NICKNAME_DUP){
 				System.out.println("du");
 			}
-			else if( entercheck == nt.NICKNAME_INVALID ){
+			else if( enterchk == nt.NICKNAME_INVALID ){
 				System.out.println("invalid");
+			}
+			else if( enterchk == nt.INVALID_REQ || enterchk == nt.INVALID_RES){
+				System.out.println("INVALID");
 			}
 		}
 		else if( get.equals("RESET")){
+			/*Pair<Integer, NetworkRoomList> r2 = nt.getRoomList();
+			int getroomchk2 = r2.first();
+			if( getroomchk2 == nt.GET_ROOM_LIST_OK){	// roomlist
+				roomlists = new RoomList(r2.second().getRoomNum(), r2.second().getRooms());
+				newlist();
+				userNum = nt.getUserNum();
+				infoLabel1.setText("User number: " + Integer.toString(userNum));
+			}
+			else if( getroomchk2 == nt.NETWORK_ERROR){
+				System.out.println("Net Error");
+				cld.previous(this);
+			}
+			else if( getroomchk2 == nt.INVALID_REQ || getroomchk2 == nt.INVALID_RES){
+				System.out.println("INVALID");
+				cld.previous(this);
+			}*/
 			newlist();
 		}
 		else if( get.equals("MAKE")){
@@ -216,38 +235,82 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 			makechk = nt.makeRoom(Integer.toString(roomCount+1), NetworkRoom.ONE_WINS);
 			if( makechk == nt.MAKE_ROOM_OK ){
 				roomCount++;
-				game = new Game(this);
+				game = new Game(this,'r');
 				GAME.add(game);
 				cld.next(this);
 				GAME.setFocusable(true);
 				GAME.requestFocus();
 				GAME.addKeyListener(this);
+				
+				Pair<Integer, String> w ;
+				int waitchk;
+				while(true){
+					w = nt.waitUser();
+					waitchk = w.first();
+					if( waitchk == nt.USER_ENTER){
+						user2 = w.second();
+						game.state = game.ST_MAIN;
+						break;
+					}
+					else if(waitchk == nt.NETWORK_ERROR ){
+						System.out.println("Net Error");
+						cld.previous(this);
+						cld.previous(this);
+						break;
+					}
+					else if( waitchk == nt.INVALID_REQ || waitchk == nt.INVALID_RES){
+						System.out.println("INVALID");
+						cld.previous(this);
+						cld.previous(this);
+						break;
+					}
+				}		
 			}
 			else if( makechk == nt.NETWORK_ERROR ){
 				System.out.println("Net error");
-			}	
+				cld.previous(this);
+			}
+			else if( makechk == nt.INVALID_REQ || makechk == nt.INVALID_RES){
+				System.out.println("INVALID");
+				cld.previous(this);
+			}
 		}
 		else{
 			int enterRoomchk;
 			enterRoomchk = nt.enterRoom(Integer.parseInt(get));
-			if(enterRoomchk == nt.USER_ENTER){
-				game = new Game(this);
+			if(enterRoomchk == nt.ENTER_ROOM_OK){
+				game = new Game(this,'b');
 				GAME.add(game);
 				cld.next(this);
 				GAME.setFocusable(true);
 				GAME.requestFocus();
 				GAME.addKeyListener(this);
 			}
+			else if( enterRoomchk == nt.NETWORK_ERROR){
+				System.out.println("Net Error");
+				cld.previous(this);
+			}
+			else if( enterRoomchk == nt.INVALID_REQ || enterRoomchk == nt.INVALID_RES){
+				System.out.println("INVALID");
+				cld.previous(this);
+			}
 		}
 	}
-	public void newlist(){
+	public static void newlist(){
+		Pair<Integer, NetworkRoomList> rl = nt.getRoomList();
+		int getroomchk = rl.first();
+		if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
+			roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
+			newlist();
+			userNum = nt.getUserNum();
+			infoLabel1.setText("User number: " + Integer.toString(userNum));
+		}
 		Font fff = new Font("Serif",Font.BOLD,30);
 		for(int i = 0 ; i < roomlists.roomNum ; i++){
 			bt[i].setFont(fff);
 			bt[i].setLabel("roomId: " + Integer.toString(rooms[i].roomId));
 		}
 	}
-	
 	public static void main(String[] args) {
 		FourMok f = new FourMok("4BINGGO");
 		f.setSize(800, 800);
@@ -270,14 +333,11 @@ class Room{
 
 class RoomList{
 	int roomNum;	// room 갯수
-	RoomList(int roomNum, /*FourMok.nt.*/NetworkRoom[] rooms){
+	RoomList(int roomNum, NetworkRoom[] rooms){
 		this.roomNum = roomNum;
 		FourMok.rooms = new Room[rooms.length];
 		for(int i = 0 ; i < rooms.length; i++){
-			FourMok.rooms[i] = new Room(rooms[i].getRoomId(), rooms[i].getGuests(),rooms[i].getIsOpened());
-			/*FourMok.rooms[i].roomId = rooms[i].getRoomId();
-			FourMok.rooms[i].guests = rooms[i].getGuests();
-			FourMok.rooms[i].isOpened = rooms[i].getIsOpened();*/
+			FourMok.rooms[i] = new Room(rooms[i].getRoomId(), rooms[i].getGuests(), rooms[i].getIsOpened());
 		}
 	}
 }
