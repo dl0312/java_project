@@ -2,10 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Game extends Canvas{
+	public static int ST_WAIT = -1;
 	public static int ST_MAIN = 0;
 	public static int ST_GAME = 1;
 	public static int ST_ENDING = 2;
 	public static int ST_EXIT = 3;
+
+	
 	public int state;			//game state
 
 	private Frame f;
@@ -36,13 +39,14 @@ public class Game extends Canvas{
 	private static char turn;		// turn of(red or blue)
 	public char	winner; 			// winner
 	
-	public Game(Frame fm){
+	public Game(Frame fm,char turn){
 		f = fm;
+		this.turn = turn;
 		Space = Toolkit.getDefaultToolkit().getImage("space.png");
 		Rball = Toolkit.getDefaultToolkit().getImage("red.png");
 		Bball = Toolkit.getDefaultToolkit().getImage("blue.png");
 		Victory = Toolkit.getDefaultToolkit().getImage("victory.png");;
-		state = ST_MAIN;
+		state = ST_WAIT;
 		Init();
 	}
 	public void Init(){
@@ -60,7 +64,6 @@ public class Game extends Canvas{
 			for(int j = 0 ; j < 9; j++){
 				y[j] = 180 + j*40;
 				status[i][j] = 'C';
-				turn = 'r';
 			}
 		}
 	}
@@ -169,15 +172,62 @@ public class Game extends Canvas{
 				break;
 			case 32: // space bar (drop Ball)
 				FourMok.KEY = 0;
-				if( state == ST_MAIN){
+				if( state == ST_MAIN)
+				{
 					if( Adx == 0 ){
-						state = ST_GAME;
-						repaint();
+						int readychk = FourMok.nt.readyGame();
+						int startchk;
+						if( readychk == FourMok.nt.READY_OK){
+							while(true){
+								startchk = FourMok.nt.waitGameStart();
+								if(startchk == FourMok.nt.GAME_START){
+									state = ST_GAME;
+									repaint();
+									break;
+								}
+								else if(startchk == FourMok.nt.TIME_OVER){
+									System.out.println("TIME OVER");
+									break;
+								}
+								else if(startchk == FourMok.nt.NETWORK_ERROR){
+									System.out.println("Net Error");
+									FourMok.cld.previous(f);
+									FourMok.cld.previous(f);
+									break;
+								}
+								else if( startchk==FourMok.nt.INVALID_REQ || startchk==FourMok.nt.INVALID_RES){
+									System.out.println("INVALID");
+								}
+							}
+						}
+						else if(readychk == FourMok.nt.NETWORK_ERROR){
+							System.out.println("Net Error");
+							FourMok.cld.previous(f);
+							FourMok.cld.previous(f);
+						}
+						else if( readychk==FourMok.nt.INVALID_REQ || readychk==FourMok.nt.INVALID_RES){
+							System.out.println("INVALID");
+							FourMok.cld.previous(f);
+							FourMok.cld.previous(f);
+						}
 					}
 					else{
-						FourMok.cld.previous(f);
-						FourMok.GAME.remove(this);
-						//System.exit(0);
+						int exitchk = FourMok.nt.exitRoom();
+						if(exitchk == FourMok.nt.EXIT_ROOM_OKAY){
+							FourMok.newlist();
+							FourMok.cld.previous(f);
+							FourMok.GAME.remove(this);
+						}
+						else if(exitchk == FourMok.nt.NETWORK_ERROR){
+							System.out.println("Net Error");
+							FourMok.cld.previous(f);
+							FourMok.cld.previous(f);
+						}
+						else if( exitchk==FourMok.nt.INVALID_REQ || exitchk==FourMok.nt.INVALID_RES){
+							System.out.println("INVALID");
+							FourMok.cld.previous(f);
+							FourMok.cld.previous(f);
+						}
 					}
 				}
 				else if( state == ST_ENDING){
@@ -187,23 +237,56 @@ public class Game extends Canvas{
 				else if( state == ST_GAME){
 					if(status[col][0] != 'C') // full line
 						return;
+					int dropchk = FourMok.nt.dropBall(col);
+					if( dropchk == FourMok.nt.DROP_BALL_OK){
+						shadow(BEFORE);		// draw droped ball
+						status[col][row] = turn;
+						if(Victory() == true)
+							return;
+						col = 0;
+						AFTER.drawImage(Image_B,0,0,this);
+						if(turn == 'r'){			// red
+							//turn = 'b';
+							AFTER.drawImage(Bball,x[0], 100, 40,40,this);				
+							shadow(AFTER);
+						}
+						else{				// blue
+							//turn = 'r';				
+							AFTER.drawImage(Rball, x[0], 100, 40,40,this);
+							shadow(AFTER);
+						}
+						//////ENEMY_DROP
+						Pair<Integer,Integer> d = FourMok.nt.waitDrop() ;
+						int enemychk; //int enemydrop;
+						while(true){
+							enemychk = d.first();
+							if(enemychk == FourMok.nt.ENEMY_DROP){
+								col = d.second();
+								break;
+							}
+						}
+						shadow(BEFORE);
+						status[col][row] = turn;
+						if(Victory() == true)
+							return;
+						col = 0;
+						AFTER.drawImage(Image_B,0,0,this);
+						if(turn == 'r'){			// red
+							//turn = 'b';
+							AFTER.drawImage(Rball,x[0], 100, 40,40,this);				
+							shadow(AFTER);
+						}
+						else{				// blue
+							//turn = 'r';				
+							AFTER.drawImage(Bball, x[0], 100, 40,40,this);
+							shadow(AFTER);
+						}
+						
+					}
+					else if(dropchk == FourMok.nt.NETWORK_ERROR){
+						System.out.println("net error");
+					}
 					
-					shadow(BEFORE);		// draw droped ball
-					status[col][row] = turn;
-					if(Victory() == true)
-						return;
-					col = 0;
-					AFTER.drawImage(Image_B,0,0,this);
-					if(turn == 'r'){			// red
-						turn = 'b';
-						AFTER.drawImage(Bball,x[0], 100, 40,40,this);				
-						shadow(AFTER);
-					}
-					else{				// blue
-						turn = 'r';				
-						AFTER.drawImage(Rball, x[0], 100, 40,40,this);
-						shadow(AFTER);
-					}
 				}
 				break;
 		}
