@@ -37,6 +37,7 @@ class PacketFlag {
 	public static final int GAME_READY_REQ = 1111;
 	// x
 	public static final int GAME_READY_RES = 2222;
+	public static final int GAME_READY_FAIL_RES = 13579;
 	// x
 	public static final int WAIT_GAMESTART_REQ = 16;
 	// x

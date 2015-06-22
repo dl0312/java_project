@@ -8,7 +8,7 @@ public class Game extends Canvas{
 	public static int ST_ENDING = 2;
 	public static int ST_EXIT = 3;
 
-	
+	private int exitchk;
 	public int state;			//game state
 
 	private Frame f;
@@ -43,8 +43,10 @@ public class Game extends Canvas{
 	private int flag1;
 	private int flag2;
 	
+	
+	
 	public Game(Frame fm,char t){
-		flag1 = 0; flag2 = 0;
+		flag1 = 0; flag2 = 0; exitchk = 0;
 		f = fm;
 		Me = t; 
 		if( Me == 'r')
@@ -165,12 +167,29 @@ public class Game extends Canvas{
 		}
 		switch(FourMok.KEY)
 		{
-			case 27:
+			case 27:	//esc
 				FourMok.KEY = 0;
-				FourMok.cld.previous(f);
-				FourMok.cld.previous(f);
-				FourMok.GAME.remove(this);
-			break;
+				exitchk = FourMok.nt.exitRoom();
+				if(exitchk == FourMok.nt.EXIT_ROOM_OKAY){
+					System.out.println("EXIT_ROOM");
+					FourMok.newlist();
+					FourMok.cld.previous(f);
+					FourMok.cld.previous(f);
+					FourMok.GAME.remove(this);
+				}
+				else if(exitchk == FourMok.nt.NETWORK_ERROR){
+					System.out.println("Net Error");
+					FourMok.cld.previous(f);
+					FourMok.cld.previous(f);
+					FourMok.GAME.remove(this);
+				}
+				else if( exitchk==FourMok.nt.INVALID_REQ || exitchk==FourMok.nt.INVALID_RES){
+					System.out.println("INVALID");
+					FourMok.cld.previous(f);
+					FourMok.cld.previous(f);
+					FourMok.GAME.remove(this);
+				}
+				break;
 			case 37: // left
 				FourMok.KEY = 0;
 				if(state == ST_MAIN){
@@ -221,6 +240,10 @@ public class Game extends Canvas{
 									repaint();
 									break;
 								}
+								else if( startchk == FourMok.nt.ENEMY_EXIT){
+									System.out.println("ENEMY EXIT");
+									continue;
+								}
 								else if(startchk == FourMok.nt.TIME_OVER){
 									System.out.println("TIME OVER");
 									//break;
@@ -236,6 +259,14 @@ public class Game extends Canvas{
 								}
 							}
 						}
+						else if( readychk == FourMok.nt.READY_FAIL){
+							System.out.println("READY_FAIL");
+							return;
+						}
+						else if( readychk == FourMok.nt.ENEMY_EXIT){
+							System.out.println("ENEMY_EXIT");
+							return;
+						}
 						else if(readychk == FourMok.nt.NETWORK_ERROR){
 							System.out.println("Net Error");
 							FourMok.cld.previous(f);
@@ -248,9 +279,16 @@ public class Game extends Canvas{
 						}
 					}
 					else{	// exit
-						int exitchk = FourMok.nt.exitRoom();
+						exitchk = FourMok.nt.exitRoom();
 						if(exitchk == FourMok.nt.EXIT_ROOM_OKAY){
 							System.out.println("EXIT_ROOM");
+							FourMok.newlist();
+							FourMok.cld.previous(f);
+							FourMok.cld.previous(f);
+							FourMok.GAME.remove(this);
+						}
+						else if( exitchk == FourMok.nt.ENEMY_EXIT){
+							System.out.println("ENEMY EXIT");
 							FourMok.newlist();
 							FourMok.cld.previous(f);
 							FourMok.cld.previous(f);
@@ -269,12 +307,9 @@ public class Game extends Canvas{
 					}
 				}
 				else if( state == ST_ENDING){
-					//state = ST_MAIN;
-					//repaint();
-					FourMok.newlist();
-					FourMok.cld.previous(f);
-					FourMok.cld.previous(f);
-					FourMok.GAME.remove(this);
+					flag1 = 0; flag2 = 0;
+					state = ST_MAIN;
+					repaint();
 				}
 				else if( state == ST_GAME){
 					if(status[col][0] != 'C') // full line
@@ -288,11 +323,7 @@ public class Game extends Canvas{
 							System.out.println("Me WINNNNNNNNNNNN");
 							return;
 						}
-						
-						System.out.println("++++++++++");
 						EnemyDrop();
-						System.out.println("----------");
-						
 						if(Victory(Enemy) == true){
 							System.out.println("ENEMY WINNNNNNNNNN");
 							return;	
@@ -308,6 +339,13 @@ public class Game extends Canvas{
 							AFTER.drawImage(Bball, x[0], 100, 40,40,this);
 							shadow(AFTER, Me);
 						}
+					}
+					else if(dropchk == FourMok.nt.ENEMY_EXIT ){	
+						System.out.println("ENEMY EXIT");
+						FourMok.nt.dropBall(col);
+						state = ST_MAIN;
+						Init(); Background();
+						repaint();
 					}
 					else if(dropchk == FourMok.nt.NETWORK_ERROR){
 						System.out.println("net error");
@@ -337,8 +375,21 @@ public class Game extends Canvas{
 				
 				return;
 			}
+			else if( enemychk == FourMok.nt.ENEMY_EXIT){
+				System.out.println("ENEMY EXIT");
+				state = ST_MAIN;
+				Init(); Background();
+				System.out.println("rr+++++++++++++");
+				repaint();
+				System.out.println("rr-------------");
+				continue;
+			}
 			else if( enemychk == FourMok.nt.TIME_OVER){
-				//System.out.println("enemy: TIMEOVER");
+				System.out.println("enemy: TIMEOVER");
+			}
+			else if( enemychk == FourMok.nt.INVALID_REQ || enemychk == FourMok.nt.INVALID_RES ){
+				System.out.println("INVALID");
+				break;
 			}
 		}
 	}

@@ -96,6 +96,7 @@ interface NetworkInterface {
 	// internally using static flag, prevent duplicate sending packet.
 	// 이 사실은 모든 함수들에 해당됨.
 	public static final int READY_OK = 15;
+	public static final int READY_FAIL = 4321;
 	int readyGame();	// wait
 	
 	public static final int EXIT_ROOM_OKAY = 2222;
@@ -554,6 +555,9 @@ class NetworkMethod implements NetworkInterface {
 				resDataInputStream.close();
 				READY_GAME_RES_FLAG = true;
 				return READY_OK;
+			} else if(flag == PacketFlag.GAME_READY_FAIL_RES) {
+				resDataInputStream.close();
+				return READY_FAIL;
 			} else if(flag == PacketFlag.ENEMY_EXIT) {
 				resDataInputStream.close();
 				return ENEMY_EXIT;

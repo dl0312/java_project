@@ -40,7 +40,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	private Label nameLabel;
 	private Panel roominfo;		// 방정보 몇명
 	private static Label infoLabel1;
-	private Label infoLabel2;
+	private static Label infoLabel2;
 	
 	private Panel WAIT;
 	private Label waitLabel;
@@ -106,8 +106,8 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		button.add(reset); button.add(makeroom);
 
 		nameLabel = new Label();
-
 		roominfo = new Panel();
+		
 		roominfo.setLayout(new BorderLayout());
 		roominfo.setBackground(Color.LIGHT_GRAY);
 		infoLabel1 = new Label("User number: ");
@@ -241,8 +241,6 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 						break;
 					}
 				}
-				
-				
 			}
 			else if( makechk == nt.NETWORK_ERROR ){
 				System.out.println("Net error");
@@ -281,8 +279,10 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
 			roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
 			userNum = nt.getUserNum();
+			System.out.println(nt.getUserNum());
 			infoLabel1.setText("User number: " + Integer.toString(userNum));
 		}
+		infoLabel2.setText("Room number: " + Integer.toString(roomlists.roomNum));
 		Font fff = new Font("Serif",Font.BOLD,30);
 		for(int i = 0 ; i < roomlists.roomNum ; i++){
 			bt[i].setFont(fff);
@@ -293,6 +293,11 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 			else{
 				bt[i].setBackground(new Color(199,21,133));
 			}
+		}
+		for(int j = roomlists.roomNum ; j < 6; j++ ){
+			bt[j].setFont(fff);
+			bt[j].setLabel("Empty");
+			bt[j].setBackground(Color.LIGHT_GRAY);
 		}
 	}
 	public static void main(String[] args) {
