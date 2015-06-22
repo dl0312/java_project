@@ -209,23 +209,23 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 			int makechk;
 			makechk = nt.makeRoom(Integer.toString(roomCount+1), NetworkRoom.ONE_WINS);
 			if( makechk == nt.MAKE_ROOM_OK ){
-				roomCount++;
-				game = new Game(this,'r');
-				GAME.add(game);
 				cld.next(this);
-				GAME.setFocusable(true);
-				GAME.requestFocus();
-				GAME.addKeyListener(this);
-				
 				Pair<Integer, String> w ;
 				int waitchk;
 				while(true){
 					w = nt.waitUser();
 					waitchk = w.first();
 					if( waitchk == nt.USER_ENTER){
+						roomCount++;
+						game = new Game(this,'r');
+						GAME.add(game);
 						cld.next(this);
+						GAME.setFocusable(true);
+						GAME.requestFocus();
+						GAME.addKeyListener(this);
 						user2 = w.second();
 						game.state = game.ST_MAIN;
+						game.repaint();
 						break;
 					}
 					else if(waitchk == nt.NETWORK_ERROR ){
@@ -262,6 +262,9 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 				GAME.setFocusable(true);
 				GAME.requestFocus();
 				GAME.addKeyListener(this);
+				game.state = game.ST_MAIN;
+				game.repaint();
+				
 			}
 			else if( enterRoomchk == nt.NETWORK_ERROR){
 				System.out.println("Net Error");
@@ -279,7 +282,9 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		if( getroomchk == nt.GET_ROOM_LIST_OK){	// roomlist
 			roomlists = new RoomList(rl.second().getRoomNum(), rl.second().getRooms());
 			userNum = nt.getUserNum();
-			System.out.println(nt.getUserNum());
+			userNum = nt.getUserNum();
+			System.out.println("-------------");
+			System.out.println(userNum);
 			infoLabel1.setText("User number: " + Integer.toString(userNum));
 		}
 		infoLabel2.setText("Room number: " + Integer.toString(roomlists.roomNum));

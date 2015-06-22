@@ -59,7 +59,8 @@ public class Game extends Canvas{
 		Bball = Toolkit.getDefaultToolkit().getImage("blue.png");
 		Victory = Toolkit.getDefaultToolkit().getImage("victory.png");;
 		state = ST_MAIN;
-		Init();
+		Init(); 
+		repaint();
 	}
 	public void Init(){
 		x = new int[7]; y = new int[9];	status = new char[7][9];
@@ -106,9 +107,20 @@ public class Game extends Canvas{
 		BEFORE.setColor(new Color(0,51,102));
 		BEFORE.fillRect(95,95,290,450);
 		BEFORE.setColor(Color.BLACK);
+		
+		if( Me == 'r'){
+			BEFORE.drawImage(Rball, x[0], y[0],40,40, this);
+			shadow(BEFORE,Me);
+		}
+		else{
+			BEFORE.drawImage(Bball, x[0], y[0],40,40, this);
+			shadow(BEFORE,Me);
+		}
+		
 		BEFORE.fillRect(100, 100, 280, 440);
 		BEFORE.setColor(new Color(0,51,102));
 		BEFORE.drawLine(105, 160, 375, 160); // game Space
+		
 		
 		BEFORE.setColor(new Color(0,255,255));
 		BEFORE.setFont(new Font("µ¸¿ò",Font.BOLD,50));
@@ -126,8 +138,6 @@ public class Game extends Canvas{
 	}
 	private void keyReader()
 	{	
-		//if(FourMok.KEY == )
-		
 		if( state == ST_MAIN){
 			Background();
 			AFTER.drawImage(Image_B, 0, 0, this);
@@ -150,6 +160,7 @@ public class Game extends Canvas{
 				}
 				else if(flag1 == 0){
 					EnemyDrop();
+					//AFTER.drawImage(img, x, y, observer)
 					if(Victory(Enemy) == true)
 						return;	
 					col = 0;
@@ -242,11 +253,20 @@ public class Game extends Canvas{
 								}
 								else if( startchk == FourMok.nt.ENEMY_EXIT){
 									System.out.println("ENEMY EXIT");
+									if( Me == 'r'){
+										Me = 'b';
+										Enemy = 'r';
+									}
+									else{
+										Me = 'r';
+										Enemy = 'b';
+										
+									}
+									
 									continue;
 								}
 								else if(startchk == FourMok.nt.TIME_OVER){
 									System.out.println("TIME OVER");
-									//break;
 								}
 								else if(startchk == FourMok.nt.NETWORK_ERROR){
 									System.out.println("Net Error");
@@ -265,6 +285,14 @@ public class Game extends Canvas{
 						}
 						else if( readychk == FourMok.nt.ENEMY_EXIT){
 							System.out.println("ENEMY_EXIT");
+							if( Me == 'r'){
+								Me = 'b';
+								Enemy = 'r';
+							}
+							else{
+								Me = 'r';
+								Enemy = 'b';
+							}
 							return;
 						}
 						else if(readychk == FourMok.nt.NETWORK_ERROR){
@@ -309,6 +337,7 @@ public class Game extends Canvas{
 				else if( state == ST_ENDING){
 					flag1 = 0; flag2 = 0;
 					state = ST_MAIN;
+					Init();
 					repaint();
 				}
 				else if( state == ST_GAME){
@@ -365,6 +394,7 @@ public class Game extends Canvas{
 				//System.out.println("ENEMY DROP");
 				col = d.second();
 				System.out.println("ENEMY DROP COL: " + col);
+				//AFTER.drawImage(Image_B, 0, 0, this);
 				shadow(AFTER,Enemy);
 				shadow(BEFORE, Enemy);
 				//AFTER.drawImage(Image_B, 0, 0, this);
@@ -456,7 +486,6 @@ public class Game extends Canvas{
 			}
 			AFTER.drawImage(Image_E, 0, 0, this);
 			state = ST_ENDING;
-			Init();
 			return true;
 		}
 		return false;
@@ -473,6 +502,7 @@ public class Game extends Canvas{
 		}
 		else{
 			g.drawImage(Bball, x[col], y[row], 40,40,this);
+			
 		}
 	}
 }
