@@ -42,6 +42,8 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 	private static Label infoLabel1;
 	private Label infoLabel2;
 	
+	private Panel WAIT;
+	private Label waitLabel;
 	
 	public static Panel GAME;	// room( game 진행 화면)
 	private Game game;			// game 함수
@@ -124,6 +126,12 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		
 		//2 end
 		
+		WAIT = new Panel();
+		WAIT.setBackground(Color.GRAY);
+		waitLabel = new Label("Wait..");
+		waitLabel.setFont(new Font("Serif", Font.BOLD + Font.ITALIC , 100));
+		WAIT.add(waitLabel);
+		
 		//3 Game
 		GAME = new Panel();
 		GAME.setLayout(new GridLayout(1,1,0,0));
@@ -132,6 +140,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		// card 추가
 		add(ENTER, "enter");
 		add(ROOM , "room");
+		add(WAIT, "wait");
 		add(GAME, "game");
 		
 		for(int i = 0 ; i < 6; i++){
@@ -153,6 +162,9 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 				game.repaint();
 				break;
 			case KeyEvent.VK_SPACE: //32
+				game.repaint();
+				break;
+			case KeyEvent.VK_ESCAPE:
 				game.repaint();
 				break;
 		}
@@ -211,6 +223,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 					w = nt.waitUser();
 					waitchk = w.first();
 					if( waitchk == nt.USER_ENTER){
+						cld.next(this);
 						user2 = w.second();
 						game.state = game.ST_MAIN;
 						break;
@@ -247,6 +260,7 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 				game = new Game(this,'b');
 				GAME.add(game);
 				cld.next(this);
+				cld.next(this);
 				GAME.setFocusable(true);
 				GAME.requestFocus();
 				GAME.addKeyListener(this);
@@ -273,6 +287,12 @@ public class FourMok extends Frame implements KeyListener, ActionListener{
 		for(int i = 0 ; i < roomlists.roomNum ; i++){
 			bt[i].setFont(fff);
 			bt[i].setLabel("roomId: " + Integer.toString(rooms[i].roomId));
+			if(rooms[i].isOpened == true){
+				bt[i].setBackground(new Color(30,144,255));
+			}
+			else{
+				bt[i].setBackground(new Color(199,21,133));
+			}
 		}
 	}
 	public static void main(String[] args) {

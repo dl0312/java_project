@@ -577,7 +577,9 @@ class NetworkMethod implements NetworkInterface {
 	
 	public int exitRoom(){
 		try{
+			System.out.println("[Debug] (exitRoom) ----------------1");
 			if(EXIT_ROOM_RES_FLAG){
+				System.out.println("[Debug] (exitRoom) ----------------2");
 				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
 				byte[] reqData;
 				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
@@ -593,15 +595,18 @@ class NetworkMethod implements NetworkInterface {
 				EXIT_ROOM_RES_FLAG = false;
 				System.out.println("[Debug] (exitRoom) reqData.length : " + reqData.length + " *** reqData : " + new String(reqData));
 			}
-			
+			System.out.println("[Debug] (exitRoom) ----------------3");
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
+			System.out.println("[Debug] (exitRoom) ----------------3.5");
 			int readLen = 0;
 			int readSz = -9999;
 			byte[] resData = new byte[dataLen];
+			System.out.println("[Debug] (exitRoom) ----------------4 ::: " + dataLen);
 			while(readLen < dataLen && (readSz=resStream.read(resData,readLen,dataLen-readLen)) != -1) {
 				readLen += readSz;
 			}
+			System.out.println("[Debug] (exitRoom) ----------------5");
 			if(readLen < dataLen) {
 				sock.close();
 				return INVALID_RES;
@@ -765,7 +770,9 @@ class NetworkMethod implements NetworkInterface {
 	
 	public Pair<Integer, Integer> waitDrop(){
 		try{
+			System.out.println("[Debug] (waitDrop) ----------------1");
 			if(WAIT_DROP_RES_FLAG){
+				System.out.println("[Debug] (waitDrop) ----------------2");
 				DataOutputStream reqStream = new DataOutputStream(sock.getOutputStream());
 				byte[] reqData;
 				ByteArrayOutputStream reqDataStream = new ByteArrayOutputStream();
@@ -780,7 +787,7 @@ class NetworkMethod implements NetworkInterface {
 				WAIT_DROP_RES_FLAG = false;
 				System.out.println("[Debug] (waitDrop) reqData.length : " + reqData.length + " *** reqData : " + new String(reqData));
 			}
-			
+			System.out.println("[Debug] (waitDrop) ----------------3");
 			DataInputStream resStream = new DataInputStream(sock.getInputStream());
 			int dataLen = resStream.readInt();
 			int readLen = 0;
@@ -802,9 +809,11 @@ class NetworkMethod implements NetworkInterface {
 			if(flag == PacketFlag.ENEMY_DROP_BALL_RES) {
 				int positiondrop = resDataInputStream.readInt();
 				resDataInputStream.close();
+				WAIT_DROP_RES_FLAG = true;
 				return new Pair <Integer, Integer>( new Integer(ENEMY_DROP), positiondrop);
 			} else if(flag == PacketFlag.ENEMY_DROP_BALL_TIMEOVER_RES) {
 				resDataInputStream.close();
+				WAIT_DROP_RES_FLAG = true;
 				return new Pair <Integer, Integer>( new Integer(TIME_OVER), null);
 			} else if(flag == PacketFlag.ENEMY_EXIT) {
 				resDataInputStream.close();

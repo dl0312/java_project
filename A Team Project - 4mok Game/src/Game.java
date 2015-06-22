@@ -36,12 +36,22 @@ public class Game extends Canvas{
 	private static int x[];
 	private static int y[];
 	private static char status[][];	// red or blue or null('C')
-	private char turn;		// turn of(red or blue)
+	private char Me;		// turn of(red or blue)
+	private char Enemy;
 	public char	winner; 			// winner
 	
+	private int flag1;
+	private int flag2;
+	
 	public Game(Frame fm,char t){
+		flag1 = 0; flag2 = 0;
 		f = fm;
-		turn = t;
+		Me = t; 
+		if( Me == 'r')
+			Enemy = 'b';
+		else
+			Enemy = 'r';
+		
 		Space = Toolkit.getDefaultToolkit().getImage("space.png");
 		Rball = Toolkit.getDefaultToolkit().getImage("red.png");
 		Bball = Toolkit.getDefaultToolkit().getImage("blue.png");
@@ -114,6 +124,7 @@ public class Game extends Canvas{
 	}
 	private void keyReader()
 	{	
+		//if(FourMok.KEY == )
 		
 		if( state == ST_MAIN){
 			Background();
@@ -122,20 +133,44 @@ public class Game extends Canvas{
 		}
 		
 		if(state == ST_GAME){
-			if(turn == 'r'){
+			if(Me == 'r'){
 				AFTER.drawImage(Image_B,0,0,this);
 				AFTER.drawImage(Rball, x[col], 100, 40,40,this);
-				shadow(AFTER);
+				shadow(AFTER,Me);
 			}
 			else{
 				AFTER.drawImage(Image_B,0,0,this);
 				AFTER.drawImage(Bball, x[col], 100, 40,40,this);
-				shadow(AFTER);
+				shadow(AFTER,Me);
+				if(flag2 == 0){
+					flag2 = 22;
+					repaint();
+				}
+				else if(flag1 == 0){
+					EnemyDrop();
+					if(Victory(Enemy) == true)
+						return;	
+					col = 0;
+					if(Me == 'r'){			
+						AFTER.drawImage(Rball,x[0], 100, 40,40,this);				
+						shadow(AFTER, Me);
+					}
+					else{							
+						AFTER.drawImage(Bball, x[0], 100, 40,40,this);
+						shadow(AFTER, Me);
+					}
+					flag1 = 11;
+				}
 			}
 		}
-		
 		switch(FourMok.KEY)
 		{
+			case 27:
+				FourMok.KEY = 0;
+				FourMok.cld.previous(f);
+				FourMok.cld.previous(f);
+				FourMok.GAME.remove(this);
+			break;
 			case 37: // left
 				FourMok.KEY = 0;
 				if(state == ST_MAIN){
@@ -145,11 +180,11 @@ public class Game extends Canvas{
 				if( state == ST_GAME){
 					if(col > 0){					
 						AFTER.drawImage(Image_B,0,0,this);
-						if(turn == 'r')
+						if(Me == 'r')
 							AFTER.drawImage(Rball, x[--col], 100, 40,40,this);
 						else
 							AFTER.drawImage(Bball, x[--col], 100, 40,40,this);
-						shadow(AFTER);
+						shadow(AFTER,Me);
 					}
 				}
 				break;
@@ -162,11 +197,11 @@ public class Game extends Canvas{
 				if( state == ST_GAME){
 					if(col < 6){
 						AFTER.drawImage(Image_B,0,0,this);
-						if(turn == 'r')
+						if(Me == 'r')
 							AFTER.drawImage(Rball, x[++col], 100, 40,40,this);
 						else
 							AFTER.drawImage(Bball, x[++col], 100, 40,40,this);
-						shadow(AFTER);
+						shadow(AFTER,Me);
 					}
 				}
 				break;
@@ -174,7 +209,7 @@ public class Game extends Canvas{
 				FourMok.KEY = 0;
 				if( state == ST_MAIN)
 				{
-					if( Adx == 0 ){
+					if( Adx == 0 ){	// ready and start
 						int readychk = FourMok.nt.readyGame();
 						int startchk;
 						if( readychk == FourMok.nt.READY_OK){
@@ -182,12 +217,13 @@ public class Game extends Canvas{
 								startchk = FourMok.nt.waitGameStart();
 								if(startchk == FourMok.nt.GAME_START){
 									state = ST_GAME;
+									System.out.println("GAME START");
 									repaint();
 									break;
 								}
 								else if(startchk == FourMok.nt.TIME_OVER){
 									System.out.println("TIME OVER");
-									break;
+									//break;
 								}
 								else if(startchk == FourMok.nt.NETWORK_ERROR){
 									System.out.println("Net Error");
@@ -196,7 +232,7 @@ public class Game extends Canvas{
 									break;
 								}
 								else if( startchk==FourMok.nt.INVALID_REQ || startchk==FourMok.nt.INVALID_RES){
-									System.out.println("INVALID");
+									System.out.println("start INVALID");
 								}
 							}
 						}
@@ -206,15 +242,17 @@ public class Game extends Canvas{
 							FourMok.cld.previous(f);
 						}
 						else if( readychk==FourMok.nt.INVALID_REQ || readychk==FourMok.nt.INVALID_RES){
-							System.out.println("INVALID");
+							System.out.println("ready INVALID");
 							FourMok.cld.previous(f);
 							FourMok.cld.previous(f);
 						}
 					}
-					else{
+					else{	// exit
 						int exitchk = FourMok.nt.exitRoom();
 						if(exitchk == FourMok.nt.EXIT_ROOM_OKAY){
+							System.out.println("EXIT_ROOM");
 							FourMok.newlist();
+							FourMok.cld.previous(f);
 							FourMok.cld.previous(f);
 							FourMok.GAME.remove(this);
 						}
@@ -231,67 +269,80 @@ public class Game extends Canvas{
 					}
 				}
 				else if( state == ST_ENDING){
-					state = ST_MAIN;
-					repaint();
+					//state = ST_MAIN;
+					//repaint();
+					FourMok.newlist();
+					FourMok.cld.previous(f);
+					FourMok.cld.previous(f);
+					FourMok.GAME.remove(this);
 				}
 				else if( state == ST_GAME){
 					if(status[col][0] != 'C') // full line
 						return;
 					int dropchk = FourMok.nt.dropBall(col);
 					if( dropchk == FourMok.nt.DROP_BALL_OK){
-						shadow(BEFORE);		// draw droped ball
-						status[col][row] = turn;
-						if(Victory() == true)
-							return;
-						col = 0;
+						shadow(BEFORE,Me);		// draw droped ball
 						AFTER.drawImage(Image_B,0,0,this);
-						if(turn == 'r'){			// red
-							//turn = 'b';
-							AFTER.drawImage(Bball,x[0], 100, 40,40,this);				
-							shadow(AFTER);
-						}
-						else{				// blue
-							//turn = 'r';				
-							AFTER.drawImage(Rball, x[0], 100, 40,40,this);
-							shadow(AFTER);
-						}
-						//////ENEMY_DROP
-						Pair<Integer,Integer> d = FourMok.nt.waitDrop() ;
-						int enemychk; //int enemydrop;
-						while(true){
-							enemychk = d.first();
-							if(enemychk == FourMok.nt.ENEMY_DROP){
-								col = d.second();
-								break;
-							}
-						}
-						shadow(BEFORE);
-						status[col][row] = turn;
-						if(Victory() == true)
+						status[col][row] = Me;
+						if(Victory(Me) == true){
+							System.out.println("Me WINNNNNNNNNNNN");
 							return;
-						col = 0;
-						AFTER.drawImage(Image_B,0,0,this);
-						if(turn == 'r'){			// red
-							//turn = 'b';
-							AFTER.drawImage(Rball,x[0], 100, 40,40,this);				
-							shadow(AFTER);
-						}
-						else{				// blue
-							//turn = 'r';				
-							AFTER.drawImage(Bball, x[0], 100, 40,40,this);
-							shadow(AFTER);
 						}
 						
+						System.out.println("++++++++++");
+						EnemyDrop();
+						System.out.println("----------");
+						
+						if(Victory(Enemy) == true){
+							System.out.println("ENEMY WINNNNNNNNNN");
+							return;	
+						}
+						
+						AFTER.drawImage(Image_B,0,0,this);
+						col = 0;
+						if(Me == 'r'){			
+							AFTER.drawImage(Rball,x[0], 100, 40,40,this);
+							shadow(AFTER, Me);
+						}
+						else{							
+							AFTER.drawImage(Bball, x[0], 100, 40,40,this);
+							shadow(AFTER, Me);
+						}
 					}
 					else if(dropchk == FourMok.nt.NETWORK_ERROR){
 						System.out.println("net error");
 					}
-					
 				}
 				break;
 		}
-} 
-	public boolean Victory(){
+	}
+	public void EnemyDrop(){
+		Pair<Integer,Integer> d ;
+		int enemychk; //int enemydrop;
+		while(true){
+			d = FourMok.nt.waitDrop() ;
+			enemychk = d.first();
+			//System.out.println("WAIT DROP");
+			if(enemychk == FourMok.nt.ENEMY_DROP){
+				//System.out.println("ENEMY DROP");
+				col = d.second();
+				System.out.println("ENEMY DROP COL: " + col);
+				shadow(AFTER,Enemy);
+				shadow(BEFORE, Enemy);
+				//AFTER.drawImage(Image_B, 0, 0, this);
+				if( Enemy == 'r')
+					status[col][row] = 'r';
+				else
+					status[col][row] = 'b';
+				
+				return;
+			}
+			else if( enemychk == FourMok.nt.TIME_OVER){
+				//System.out.println("enemy: TIMEOVER");
+			}
+		}
+	}
+	public boolean Victory(char turn){
 		int count = 0;
 		int n_row; 
 		int n_col;
@@ -302,7 +353,6 @@ public class Game extends Canvas{
 				count++;
 			else
 				count = 0;
-			
 			if(count == 4 )
 				check = 1;
 		}
@@ -360,16 +410,18 @@ public class Game extends Canvas{
 		}
 		return false;
 	}
-	public void shadow(Graphics g){
+	public void shadow(Graphics g, char turn){
 		if(status[col][0] != 'C')
 			return;
 		for(int j = 0; j < 9 ; j++){
 			if(status[col][j] == 'C')
 				row = j;
 		}
-		if(turn == 'r')
+		if(turn == 'r'){
 			g.drawImage(Rball, x[col], y[row], 40,40,this);
-		else
+		}
+		else{
 			g.drawImage(Bball, x[col], y[row], 40,40,this);
+		}
 	}
 }
